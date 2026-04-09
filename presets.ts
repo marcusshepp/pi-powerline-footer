@@ -48,7 +48,7 @@ export const PRESETS: Record<StatusLinePreset, PresetDef> = {
     colors: MONO_COLORS,
     segmentOptions: {
       model: { showThinkingLevel: false },
-      path: { mode: "basename" },
+      path: { mode: "full" },
       git: { showBranch: true, showStaged: true, showUnstaged: true, showUntracked: true },
     },
   },
