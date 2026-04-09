@@ -580,65 +580,58 @@ function computeResponsiveLayout(
   availableWidth: number
 ): { topContent: string; secondaryContent: string } {
   const separatorDef = getSeparator(presetDef.separator);
+  const sepAnsi = getFgAnsiCode("sep");
+  const sep = separatorDef.left;
   const sepWidth = visibleWidth(separatorDef.left) + 2; // separator + spaces around it
-  
-  // Get all segments: primary first, then secondary
-  const primaryIds = [...presetDef.leftSegments, ...presetDef.rightSegments];
+
+  // Render left, right, and secondary segments separately
+  const leftRendered: { content: string; width: number }[] = [];
+  for (const segId of presetDef.leftSegments) {
+    const r = renderSegmentWithWidth(segId, ctx);
+    if (r.visible) leftRendered.push(r);
+  }
+
+  const rightRendered: { content: string; width: number }[] = [];
+  for (const segId of presetDef.rightSegments) {
+    const r = renderSegmentWithWidth(segId, ctx);
+    if (r.visible) rightRendered.push(r);
+  }
+
   const secondaryIds = presetDef.secondarySegments ?? [];
-  const allSegmentIds = [...primaryIds, ...secondaryIds];
-  
-  // Render all segments and get their widths
-  const renderedSegments: { content: string; width: number }[] = [];
-  for (const segId of allSegmentIds) {
-    const { content, width, visible } = renderSegmentWithWidth(segId, ctx);
-    if (visible) {
-      renderedSegments.push({ content, width });
-    }
+  const secondaryRendered: { content: string; width: number }[] = [];
+  for (const segId of secondaryIds) {
+    const r = renderSegmentWithWidth(segId, ctx);
+    if (r.visible) secondaryRendered.push(r);
   }
-  
-  if (renderedSegments.length === 0) {
-    return { topContent: "", secondaryContent: "" };
+
+  // Build left side string
+  const leftParts = leftRendered.map(s => s.content);
+  const leftStr = leftParts.length > 0
+    ? " " + leftParts.join(` ${sepAnsi}${sep}${ansi.reset} `) + ansi.reset
+    : "";
+  const leftWidth = leftStr ? visibleWidth(leftStr) : 0;
+
+  // Build right side string
+  const rightParts = rightRendered.map(s => s.content);
+  const rightStr = rightParts.length > 0
+    ? rightParts.join(` ${sepAnsi}${sep}${ansi.reset} `) + ansi.reset + " "
+    : "";
+  const rightWidth = rightStr ? visibleWidth(rightStr) : 0;
+
+  // Combine with padding between left and right
+  let topContent = "";
+  if (leftStr || rightStr) {
+    const gap = Math.max(1, availableWidth - leftWidth - rightWidth);
+    topContent = leftStr + " ".repeat(gap) + rightStr;
   }
-  
-  // Calculate how many segments fit in top bar
-  // Account for: leading space (1) + trailing space (1) = 2 chars overhead
-  const baseOverhead = 2;
-  let currentWidth = baseOverhead;
-  let topSegments: string[] = [];
-  let overflowSegments: { content: string; width: number }[] = [];
-  let overflow = false;
-  
-  for (const seg of renderedSegments) {
-    const neededWidth = seg.width + (topSegments.length > 0 ? sepWidth : 0);
-    
-    if (!overflow && currentWidth + neededWidth <= availableWidth) {
-      topSegments.push(seg.content);
-      currentWidth += neededWidth;
-    } else {
-      overflow = true;
-      overflowSegments.push(seg);
-    }
-  }
-  
-  // Fit overflow segments into secondary row (same width constraint)
-  // Stop at first non-fitting segment to preserve ordering
-  let secondaryWidth = baseOverhead;
-  let secondarySegments: string[] = [];
-  
-  for (const seg of overflowSegments) {
-    const neededWidth = seg.width + (secondarySegments.length > 0 ? sepWidth : 0);
-    if (secondaryWidth + neededWidth <= availableWidth) {
-      secondarySegments.push(seg.content);
-      secondaryWidth += neededWidth;
-    } else {
-      break;
-    }
-  }
-  
-  return {
-    topContent: buildContentFromParts(topSegments, presetDef),
-    secondaryContent: buildContentFromParts(secondarySegments, presetDef),
-  };
+
+  // Secondary row
+  const secParts = secondaryRendered.map(s => s.content);
+  const secondaryContent = secParts.length > 0
+    ? " " + secParts.join(` ${sepAnsi}${sep}${ansi.reset} `) + ansi.reset + " "
+    : "";
+
+  return { topContent, secondaryContent };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
