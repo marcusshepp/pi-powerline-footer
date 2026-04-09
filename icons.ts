@@ -1,3 +1,7 @@
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { homedir } from "node:os";
+
 export interface IconSet {
   pi: string;
   model: string;
@@ -89,6 +93,27 @@ export const ASCII_ICONS: IconSet = {
   warning: "⚠",
 };
 
+// Empty icon set — no icons at all
+export const NO_ICONS: IconSet = {
+  pi: "",
+  model: "",
+  folder: "",
+  branch: "",
+  git: "",
+  tokens: "",
+  context: "",
+  cost: "",
+  time: "",
+  agents: "",
+  cache: "",
+  input: "",
+  output: "",
+  host: "",
+  session: "",
+  auto: "",
+  warning: "",
+};
+
 // Separator characters
 export interface SeparatorChars {
   powerlineLeft: string;
@@ -147,8 +172,59 @@ export function hasNerdFonts(): boolean {
   return nerdTerms.some(t => term.includes(t));
 }
 
+// Load icon overrides from ~/.pi/agent/settings.json
+// Supports: "powerlineIcons": "none" (disable all icons)
+//           "powerlineIcons": { "pi": "", "model": "M", ... } (per-icon override)
+let _iconCache: IconSet | null = null;
+let _iconCacheTime = 0;
+const ICON_CACHE_TTL = 5000;
+
+function loadIconOverrides(): "none" | Partial<IconSet> | null {
+  try {
+    const home = process.env.HOME || process.env.USERPROFILE || homedir();
+    const settingsPath = join(home, ".pi", "agent", "settings.json");
+    if (!existsSync(settingsPath)) return null;
+
+    const parsed = JSON.parse(readFileSync(settingsPath, "utf-8"));
+    if (!parsed || typeof parsed !== "object") return null;
+
+    const icons = parsed.powerlineIcons;
+    if (icons === "none") return "none";
+    if (icons && typeof icons === "object" && !Array.isArray(icons)) {
+      return icons as Partial<IconSet>;
+    }
+  } catch {
+    // Ignore read errors
+  }
+  return null;
+}
+
 export function getIcons(): IconSet {
-  return hasNerdFonts() ? NERD_ICONS : ASCII_ICONS;
+  const now = Date.now();
+  if (_iconCache && now - _iconCacheTime < ICON_CACHE_TTL) {
+    return _iconCache;
+  }
+
+  const base = hasNerdFonts() ? NERD_ICONS : ASCII_ICONS;
+  const overrides = loadIconOverrides();
+
+  let result: IconSet;
+  if (overrides === "none") {
+    result = { ...NO_ICONS };
+  } else if (overrides) {
+    result = { ...base };
+    for (const [key, val] of Object.entries(overrides)) {
+      if (key in result && typeof val === "string") {
+        (result as any)[key] = val;
+      }
+    }
+  } else {
+    result = base;
+  }
+
+  _iconCache = result;
+  _iconCacheTime = now;
+  return result;
 }
 
 export function getSeparatorChars(): SeparatorChars {
