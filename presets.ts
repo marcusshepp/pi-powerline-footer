@@ -13,6 +13,22 @@ const MINIMAL_COLORS: ColorScheme = {
   gitClean: "dim",
 };
 
+// Mono - single dim color for everything
+const MONO_COLORS: ColorScheme = {
+  ...DEFAULT_COLORS,
+  pi: "dim",
+  model: "dim",
+  path: "dim",
+  gitClean: "dim",
+  gitDirty: "dim",
+  thinking: "dim",
+  context: "dim",
+  contextWarn: "dim",
+  contextError: "dim",
+  cost: "dim",
+  tokens: "dim",
+};
+
 // Nerd - vibrant colors
 const NERD_COLORS: ColorScheme = {
   ...DEFAULT_COLORS,
@@ -25,11 +41,11 @@ const NERD_COLORS: ColorScheme = {
 
 export const PRESETS: Record<StatusLinePreset, PresetDef> = {
   default: {
-    leftSegments: ["pi", "model", "thinking", "path", "git", "context_pct", "cache_read", "cost"],
+    leftSegments: ["model", "path", "git", "context_pct", "cost"],
     rightSegments: [],
     secondarySegments: ["extension_statuses"],
-    separator: "powerline-thin",
-    colors: DEFAULT_COLORS,
+    separator: "none",
+    colors: MONO_COLORS,
     segmentOptions: {
       model: { showThinkingLevel: false },
       path: { mode: "basename" },

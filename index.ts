@@ -649,6 +649,31 @@ export default function powerlineFooter(pi: ExtensionAPI) {
   const startupSettings = readSettings();
   const resolvedShortcuts = resolveShortcutConfig(startupSettings);
 
+  // Startup phrases — one picked at random per session
+  const STARTUP_PHRASES = [
+    "build something",
+    "stay sharp",
+    "deep work",
+    "ship it",
+    "less is more",
+    "keep moving",
+    "think clearly",
+    "make it real",
+    "trust the process",
+    "no shortcuts",
+    "iterate fast",
+    "stay curious",
+    "do the work",
+    "own the outcome",
+    "break through",
+    "details matter",
+    "keep it simple",
+    "push forward",
+    "solve problems",
+    "focus up",
+  ];
+  const startupPhrase = STARTUP_PHRASES[Math.floor(Math.random() * STARTUP_PHRASES.length)];
+
   let enabled = true;
   let sessionStartTime = Date.now();
   let currentCtx: any = null;
@@ -661,6 +686,7 @@ export default function powerlineFooter(pi: ExtensionAPI) {
   let welcomeOverlayShouldDismiss = false; // Track early dismissal request (before overlay setup completes)
   let lastUserPrompt = ""; // Last user message for prompt reminder widget
   let showLastPrompt = true; // Cached setting for last prompt visibility
+  let startupPhraseActive = true; // Show random phrase on startup, dismiss with welcome
   let stashedEditorText: string | null = null;
   let stashedPromptHistory: string[] = readPersistedStashHistory();
   let currentEditor: any = null;
@@ -898,6 +924,7 @@ export default function powerlineFooter(pi: ExtensionAPI) {
 
   // Helper to dismiss welcome overlay/header
   function dismissWelcome(ctx: any) {
+    startupPhraseActive = false;
     if (dismissWelcomeOverlay) {
       dismissWelcomeOverlay();
       dismissWelcomeOverlay = null;
@@ -1940,6 +1967,20 @@ export default function powerlineFooter(pi: ExtensionAPI) {
             }
             
             return [];
+          },
+        };
+      }, { placement: "belowEditor" });
+
+      // Startup phrase widget — random phrase shown below editor until first input
+      ctx.ui.setWidget("powerline-startup-phrase", () => {
+        return {
+          dispose() {},
+          invalidate() {},
+          render(width: number): string[] {
+            if (!startupPhraseActive) return [];
+            const phrase = ` ${getFgAnsiCode("sep")}${startupPhrase}${ansi.reset}`;
+            if (visibleWidth(phrase) > width) return [];
+            return [phrase];
           },
         };
       }, { placement: "belowEditor" });
