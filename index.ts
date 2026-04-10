@@ -1890,7 +1890,7 @@ export default function powerlineFooter(pi: ExtensionAPI) {
           
           // Status bar above top border
           const layout = getResponsiveLayout(width, ctx.ui.theme);
-          result.push(layout.topContent);
+          result.push(truncateToWidth(layout.topContent, width)); // truncate to prevent TUI crash on narrow terminals
 
           // Startup phrase line (persistent, below status bar)
           result.push(` ${getFgAnsiCode("sep")}${startupPhrase}${ansi.reset}`);
