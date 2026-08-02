@@ -1293,6 +1293,8 @@ export default function powerlineFooter(pi: ExtensionAPI) {
 
   pi.on("agent_end", async (_event, ctx) => {
     isStreaming = false;
+    lastLayoutResult = null;
+    tuiRef?.requestRender();
     if (ctx.hasUI) {
       onVibeAgentEnd(ctx.ui.setWorkingMessage); // working-vibes internal state + reset message
       if (stashedEditorText !== null) {
@@ -1727,6 +1729,7 @@ export default function powerlineFooter(pi: ExtensionAPI) {
     // Build usage stats and get thinking level from session
     let input = 0, output = 0, cacheRead = 0, cacheWrite = 0, cost = 0;
     let lastAssistant: AssistantMessage | undefined;
+    let lastResponseTime: number | null = null;
     let thinkingLevelFromSession: string | null = null;
     
     const sessionEvents = ctx.sessionManager?.getBranch?.() ?? [];
@@ -1746,6 +1749,14 @@ export default function powerlineFooter(pi: ExtensionAPI) {
         cacheWrite += m.usage.cacheWrite;
         cost += m.usage.cost.total;
         lastAssistant = m;
+        const timestamp = typeof m.timestamp === "number"
+          ? m.timestamp
+          : typeof e.timestamp === "string"
+            ? Date.parse(e.timestamp)
+            : NaN;
+        if (Number.isFinite(timestamp)) {
+          lastResponseTime = timestamp;
+        }
       }
     }
 
@@ -1787,6 +1798,7 @@ export default function powerlineFooter(pi: ExtensionAPI) {
       autoCompactEnabled: ctx.settingsManager?.getCompactionSettings?.()?.enabled ?? true,
       usingSubscription,
       sessionStartTime,
+      lastResponseTime,
       git: gitStatus,
       extensionStatuses: footerDataRef?.getExtensionStatuses() ?? new Map(),
       options: presetDef.segmentOptions ?? {},

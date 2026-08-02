@@ -40,6 +40,16 @@ const NERD_COLORS: ColorScheme = {
 };
 
 export const PRESETS: Record<StatusLinePreset, PresetDef> = {
+  sync: {
+    leftSegments: ["hostname", "model", "thinking", "cost", "last_response"],
+    rightSegments: [],
+    separator: "none",
+    colors: MONO_COLORS,
+    segmentOptions: {
+      model: { showThinkingLevel: false },
+    },
+  },
+
   default: {
     leftSegments: ["model", "path", "git", "cost"],
     rightSegments: ["context_pct"],

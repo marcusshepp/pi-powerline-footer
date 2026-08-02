@@ -48,6 +48,7 @@ Activates automatically. Toggle with `/powerline`, switch presets with `/powerli
 | `full` | Everything including hostname, time, abbreviated path |
 | `nerd` | Maximum detail for Nerd Font users |
 | `ascii` | Safe for any terminal |
+| `sync` | Machine, compact model, thinking, subscription/cost, last response time |
 
 **Environment:** `POWERLINE_NERD_FONTS=1` to force Nerd Fonts, `=0` for ASCII.
 
@@ -235,7 +236,9 @@ Configure via preset options: `path: { mode: "full" }`
 
 ## Segments
 
-`pi` · `model` · `thinking` · `path` · `git` · `subagents` · `token_in` · `token_out` · `token_total` · `cost` · `context_pct` · `context_total` · `time_spent` · `time` · `session` · `hostname` · `cache_read` · `cache_write`
+`pi` · `model` · `thinking` · `path` · `git` · `subagents` · `token_in` · `token_out` · `token_total` · `cost` · `context_pct` · `context_total` · `time_spent` · `time` · `last_response` · `session` · `hostname` · `cache_read` · `cache_write`
+
+The `sync` preset renders a compact fleet footer such as `lugia sol med sub 08-02 19:41`. The final field is the local date and time of the most recent completed assistant response in `MM-DD HH:mm` format.
 
 ## Separators
 

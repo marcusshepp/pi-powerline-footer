@@ -4,6 +4,7 @@ import { visibleWidth } from "@mariozechner/pi-tui";
 import type { RenderedSegment, SegmentContext, SemanticColor, StatusLineSegment, StatusLineSegmentId } from "./types.js";
 import { fg, rainbow, applyColor } from "./theme.js";
 import { getIcons, SEP_DOT, getThinkingText } from "./icons.js";
+import { formatHostLabel, formatLastResponseAt, formatModelLabel, formatThinkingLabel } from "./labels.js";
 
 // Helper to apply semantic color from context
 function color(ctx: SegmentContext, semantic: SemanticColor, text: string): string {
@@ -67,7 +68,7 @@ const modelSegment: StatusLineSegment = {
         modelName = modelName.slice(7);
       }
 
-      content = withIcon(icons.model, modelName);
+      content = withIcon(icons.model, formatModelLabel(modelName));
 
       // Add thinking level with dot separator
       if (opts.showThinkingLevel !== false && ctx.model?.reasoning) {
@@ -185,16 +186,7 @@ const thinkingSegment: StatusLineSegment = {
     const level = ctx.thinkingLevel || "off";
 
     // Text label for each level
-    const levelText: Record<string, string> = {
-      off: "off",
-      minimal: "min",
-      low: "low",
-      medium: "med",
-      high: "high",
-      xhigh: "xhigh",
-    };
-    const label = levelText[level] || level;
-    const content = `think:${label}`;
+    const content = formatThinkingLabel(level);
 
     // Use rainbow effect for high/xhigh (like Claude Code ultrathink)
     if (level === "high" || level === "xhigh") {
@@ -259,7 +251,11 @@ const costSegment: StatusLineSegment = {
     const { cost } = ctx.usageStats;
     const usingSubscription = ctx.usingSubscription;
 
-    if (!cost || usingSubscription) {
+    if (usingSubscription) {
+      return { content: color(ctx, "cost", "sub"), visible: true };
+    }
+
+    if (!cost) {
       return { content: "", visible: false };
     }
 
@@ -344,6 +340,16 @@ const timeSegment: StatusLineSegment = {
   },
 };
 
+const lastResponseSegment: StatusLineSegment = {
+  id: "last_response",
+  render(ctx) {
+    if (ctx.lastResponseTime === null) {
+      return { content: "-- --:--", visible: true };
+    }
+    return { content: formatLastResponseAt(ctx.lastResponseTime), visible: true };
+  },
+};
+
 const sessionSegment: StatusLineSegment = {
   id: "session",
   render(ctx) {
@@ -360,7 +366,7 @@ const hostnameSegment: StatusLineSegment = {
   id: "hostname",
   render() {
     const icons = getIcons();
-    const name = osHostname().split(".")[0];
+    const name = formatHostLabel(osHostname());
     // No explicit color
     return { content: withIcon(icons.host, name), visible: true };
   },
@@ -443,6 +449,7 @@ export const SEGMENTS: Record<StatusLineSegmentId, StatusLineSegment> = {
   context_total: contextTotalSegment,
   time_spent: timeSpentSegment,
   time: timeSegment,
+  last_response: lastResponseSegment,
   session: sessionSegment,
   hostname: hostnameSegment,
   cache_read: cacheReadSegment,

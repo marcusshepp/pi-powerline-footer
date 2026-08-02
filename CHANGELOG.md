@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Added the `sync` preset: compact host, model, thinking, subscription/cost, and last-response timestamp.
+- Added Sync aliases (`gpt-5.6-sol` to `sol`, `medium` to `med`, OAuth subscription to `sub`).
+
 ## [Unreleased]
 
 ## [0.4.9] - 2026-04-03

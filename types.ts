@@ -37,6 +37,7 @@ export type StatusLineSegmentId =
   | "context_total"
   | "time_spent"
   | "time"
+  | "last_response"
   | "session"
   | "hostname"
   | "cache_read"
@@ -65,6 +66,7 @@ export type StatusLinePreset =
   | "full"
   | "nerd"
   | "ascii"
+  | "sync"
   | "custom";
 
 // Per-segment options
@@ -134,6 +136,7 @@ export interface SegmentContext {
   autoCompactEnabled: boolean;
   usingSubscription: boolean;
   sessionStartTime: number;
+  lastResponseTime: number | null;
   
   // Git
   git: GitStatus;
