@@ -6,6 +6,8 @@
 
 Customizes the default [pi](https://github.com/badlogic/pi-mono) editor with a powerline-style status bar, welcome overlay, and AI-generated "vibes" for loading messages. Inspired by [Powerlevel10k](https://github.com/romkatv/powerlevel10k) and [oh-my-pi](https://github.com/can1357/oh-my-pi).
 
+The Sync fork loads the purpose-built, lightweight `sync-footer.ts` by default. The original full powerline interface remains available explicitly with `pi -e index.ts`.
+
 <img width="1261" height="817" alt="Image" src="https://github.com/user-attachments/assets/4cc43320-3fb8-4503-b857-69dffa7028f2" />
 
 ## Features
@@ -238,7 +240,7 @@ Configure via preset options: `path: { mode: "full" }`
 
 `pi` · `model` · `thinking` · `path` · `git` · `subagents` · `token_in` · `token_out` · `token_total` · `cost` · `context_pct` · `context_total` · `time_spent` · `time` · `last_response` · `session` · `hostname` · `cache_read` · `cache_write`
 
-The `sync` preset renders a compact fleet footer such as `lugia sol med sub 08-02 19:41`. The final field is the local date and time of the most recent completed assistant response in `MM-DD HH:mm` format.
+The Sync footer renders a compact fleet line such as `lugia sol med sub 08-02 8:18pm EDT`. The final field is the Eastern date and time of the most recent completed assistant response in `MM-DD h:mmam/pm EST/EDT` format.
 
 ## Separators
 

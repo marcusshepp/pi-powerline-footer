@@ -15,8 +15,8 @@ describe("Sync footer labels", () => {
     expect(formatThinkingLabel("medium")).toBe("med");
   });
 
-  test("formats the last response as MM-DD HH:mm", () => {
-    const timestamp = new Date(2026, 7, 2, 19, 41).getTime();
-    expect(formatLastResponseAt(timestamp)).toBe("08-02 19:41");
+  test("formats the last response in 12-hour Eastern time", () => {
+    expect(formatLastResponseAt(Date.UTC(2026, 7, 3, 0, 18))).toBe("08-02 8:18pm EDT");
+    expect(formatLastResponseAt(Date.UTC(2026, 0, 2, 18, 5))).toBe("01-02 1:05pm EST");
   });
 });
