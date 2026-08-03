@@ -1,4 +1,6 @@
-import { hostname as osHostname } from "node:os";
+import { homedir, hostname as osHostname } from "node:os";
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import type { ExtensionAPI, Theme } from "@mariozechner/pi-coding-agent";
 
 import {
@@ -7,6 +9,25 @@ import {
   formatModelLabel,
   formatThinkingLabel,
 } from "./labels.js";
+
+const LAST_RESPONSE_PATH = join(homedir(), ".pi", "agent", "last-response.json");
+
+function persistedLastResponseTimestamp(): number | null {
+  try {
+    const timestamp = JSON.parse(readFileSync(LAST_RESPONSE_PATH, "utf8")).timestamp;
+    return typeof timestamp === "number" && Number.isFinite(timestamp) ? timestamp : null;
+  } catch {
+    return null;
+  }
+}
+
+function persistLastResponseTimestamp(timestamp: number): void {
+  try {
+    writeFileSync(LAST_RESPONSE_PATH, `${JSON.stringify({ timestamp })}\n`, "utf8");
+  } catch {
+    // The footer should never interrupt Pi if state persistence is unavailable.
+  }
+}
 
 function latestAssistantTimestamp(ctx: any): number | null {
   const branch = ctx.sessionManager?.getBranch?.() ?? [];
@@ -37,7 +58,7 @@ export default function syncFooter(pi: ExtensionAPI) {
 
   pi.on("session_start", async (_event, ctx) => {
     currentContext = ctx;
-    lastResponseTime = latestAssistantTimestamp(ctx) ?? Date.now();
+    lastResponseTime = latestAssistantTimestamp(ctx) ?? persistedLastResponseTimestamp() ?? Date.now();
     if (!ctx.hasUI) return;
 
     ctx.ui.setFooter((tui: any, theme: Theme) => {
@@ -69,6 +90,7 @@ export default function syncFooter(pi: ExtensionAPI) {
 
   pi.on("agent_end", async (_event, ctx) => {
     lastResponseTime = Date.now();
+    persistLastResponseTimestamp(lastResponseTime);
     redraw(ctx);
   });
   pi.on("model_select", async (_event, ctx) => redraw(ctx));
