@@ -6,6 +6,7 @@
 - Added Sync aliases (`gpt-5.6-sol` to `sol`, `medium` to `med`, OAuth subscription to `sub`).
 - Made the lightweight Sync footer the default entrypoint for faster startup.
 - Changed last-response timestamps to 12-hour Eastern time with automatic EST/EDT.
+- Added `/clear` for a fresh conversation and `/exit` for clean shutdown.
 
 ## [Unreleased]
 

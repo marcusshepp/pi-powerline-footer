@@ -56,6 +56,24 @@ export default function syncFooter(pi: ExtensionAPI) {
     requestRender?.();
   };
 
+  pi.registerCommand("exit", {
+    description: "Exit Pi cleanly",
+    handler: async (_args, ctx) => {
+      ctx.shutdown();
+    },
+  });
+
+  pi.registerCommand("clear", {
+    description: "Clear the conversation and start a fresh session",
+    handler: async (_args, ctx) => {
+      await ctx.newSession({
+        withSession: async (replacementCtx) => {
+          replacementCtx.ui.notify("Conversation cleared", "info");
+        },
+      });
+    },
+  });
+
   pi.on("session_start", async (_event, ctx) => {
     currentContext = ctx;
     lastResponseTime = latestAssistantTimestamp(ctx) ?? persistedLastResponseTimestamp() ?? Date.now();

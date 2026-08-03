@@ -8,6 +8,8 @@ Customizes the default [pi](https://github.com/badlogic/pi-mono) editor with a p
 
 The Sync fork loads the purpose-built, lightweight `sync-footer.ts` by default. The original full powerline interface remains available explicitly with `pi -e index.ts`.
 
+Sync commands: `/clear` starts a fresh conversation and `/exit` shuts Pi down cleanly.
+
 <img width="1261" height="817" alt="Image" src="https://github.com/user-attachments/assets/4cc43320-3fb8-4503-b857-69dffa7028f2" />
 
 ## Features
